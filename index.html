@@ -109,9 +109,9 @@
         const resetBtn = document.getElementById('reset-btn');
         const cycleCountSelect = document.getElementById('cycle-count');
 
-        // Preload audio and unlock with user interaction
-        const startBeep = new Audio('https://www.soundjay.com/button/beep-07.mp3');
-        const stopBeep = new Audio('https://www.soundjay.com/button/beep-09.mp3');
+        // Use locally hosted audio files
+        const startBeep = new Audio('./start_beep.mp3');
+        const stopBeep = new Audio('./stop_beep.mp3');
 
         function preloadAudio() {
             startBeep.load();
@@ -202,5 +202,3 @@
     </script>
 </body>
 </html>
-
-
