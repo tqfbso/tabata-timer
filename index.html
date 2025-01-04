@@ -109,8 +109,14 @@
         const resetBtn = document.getElementById('reset-btn');
         const cycleCountSelect = document.getElementById('cycle-count');
 
+        // Preload audio and unlock with user interaction
         const startBeep = new Audio('https://www.soundjay.com/button/beep-07.mp3');
         const stopBeep = new Audio('https://www.soundjay.com/button/beep-09.mp3');
+
+        function preloadAudio() {
+            startBeep.load();
+            stopBeep.load();
+        }
 
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
@@ -126,6 +132,9 @@
 
         function startTimer() {
             if (isRunning) return;
+
+            // Unlock audio playback
+            preloadAudio();
 
             totalCycles = parseInt(cycleCountSelect.value, 10);
             isRunning = true;
