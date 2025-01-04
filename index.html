@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabata Fitness App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .timer {
+            font-size: 5rem;
+            margin: 50px 0;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        footer {
+            margin-top: 50px;
+            color: #777;
+        }
+
+        .cycle-selector {
+            margin: 20px 0;
+        }
+
+        .cycle-selector label {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+
+        .cycle-selector select {
+            font-size: 1.2rem;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tabata Fitness Timer</h1>
+    </header>
+
+    <div class="cycle-selector">
+        <label for="cycle-count">Select number of cycles:</label>
+        <select id="cycle-count">
+            <option value="1">1 Cycle</option>
+            <option value="2">2 Cycles</option>
+            <option value="3">3 Cycles</option>
+            <option value="4">4 Cycles</option>
+            <option value="5">5 Cycles</option>
+        </select>
+    </div>
+
+    <div class="timer" id="timer-display">00:00</div>
+
+    <button id="start-btn">Start</button>
+    <button id="reset-btn" disabled>Reset</button>
+
+    <footer>
+        <p>&copy; 2025 Tabata Fitness App</p>
+    </footer>
+
+    <script>
+        let timerInterval;
+        let isRunning = false;
+        const workDuration = 20; // seconds
+        const restDuration = 10; // seconds
+        const totalRounds = 8;
+
+        let currentRound = 0;
+        let currentCycle = 0;
+        let totalCycles = 1;
+        let timeRemaining = workDuration;
+        let isWorkPhase = true;
+
+        const timerDisplay = document.getElementById('timer-display');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const cycleCountSelect = document.getElementById('cycle-count');
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+
+            totalCycles = parseInt(cycleCountSelect.value, 10);
+            isRunning = true;
+            startBtn.disabled = true;
+            resetBtn.disabled = false;
+
+            timerInterval = setInterval(() => {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                } else {
+                    if (isWorkPhase) {
+                        isWorkPhase = false;
+                        timeRemaining = restDuration;
+                        alert('Rest time!');
+                    } else {
+                        currentRound++;
+                        if (currentRound >= totalRounds) {
+                            currentRound = 0;
+                            currentCycle++;
+                            if (currentCycle >= totalCycles) {
+                                clearInterval(timerInterval);
+                                alert('Workout complete!');
+                                resetTimer();
+                                return;
+                            }
+                        }
+                        isWorkPhase = true;
+                        timeRemaining = workDuration;
+                        alert('Work time!');
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeRemaining = workDuration;
+            currentRound = 0;
+            currentCycle = 0;
+            isWorkPhase = true;
+            updateTimerDisplay();
+            startBtn.disabled = false;
+            resetBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
