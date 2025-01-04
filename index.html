@@ -126,15 +126,22 @@
 
         function playBeep(beep, repeat = 1) {
             for (let i = 0; i < repeat; i++) {
-                setTimeout(() => beep.play(), i * 500);
+                setTimeout(() => {
+                    beep.play().catch((error) => {
+                        console.error('Audio playback error:', error);
+                    });
+                }, i * 500);
             }
         }
 
         function startTimer() {
             if (isRunning) return;
 
-            // Unlock audio playback
-            preloadAudio();
+            // Unlock audio playback with explicit interaction
+            startBeep.play().catch(() => console.log('Audio unlocked for start beep.'));
+            stopBeep.play().catch(() => console.log('Audio unlocked for stop beep.'));
+
+            preloadAudio(); // Preload to ensure smooth playback later.
 
             totalCycles = parseInt(cycleCountSelect.value, 10);
             isRunning = true;
@@ -195,4 +202,5 @@
     </script>
 </body>
 </html>
+
 
