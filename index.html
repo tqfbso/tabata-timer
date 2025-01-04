@@ -94,23 +94,34 @@
         let isRunning = false;
         const workDuration = 20; // seconds
         const restDuration = 10; // seconds
+        const warmUpDuration = 7; // seconds
         const totalRounds = 8;
 
         let currentRound = 0;
         let currentCycle = 0;
         let totalCycles = 1;
-        let timeRemaining = workDuration;
-        let isWorkPhase = true;
+        let timeRemaining = warmUpDuration;
+        let isWorkPhase = false;
+        let isWarmUpPhase = true;
 
         const timerDisplay = document.getElementById('timer-display');
         const startBtn = document.getElementById('start-btn');
         const resetBtn = document.getElementById('reset-btn');
         const cycleCountSelect = document.getElementById('cycle-count');
 
+        const startBeep = new Audio('https://www.soundjay.com/button/beep-07.mp3');
+        const stopBeep = new Audio('https://www.soundjay.com/button/beep-09.mp3');
+
         function updateTimerDisplay() {
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function playBeep(beep, repeat = 1) {
+            for (let i = 0; i < repeat; i++) {
+                setTimeout(() => beep.play(), i * 500);
+            }
         }
 
         function startTimer() {
@@ -126,10 +137,15 @@
                     timeRemaining--;
                     updateTimerDisplay();
                 } else {
-                    if (isWorkPhase) {
+                    if (isWarmUpPhase) {
+                        isWarmUpPhase = false;
+                        isWorkPhase = true;
+                        timeRemaining = workDuration;
+                        playBeep(startBeep);
+                    } else if (isWorkPhase) {
                         isWorkPhase = false;
                         timeRemaining = restDuration;
-                        alert('Rest time!');
+                        playBeep(stopBeep);
                     } else {
                         currentRound++;
                         if (currentRound >= totalRounds) {
@@ -137,14 +153,14 @@
                             currentCycle++;
                             if (currentCycle >= totalCycles) {
                                 clearInterval(timerInterval);
-                                alert('Workout complete!');
+                                playBeep(stopBeep, 3);
                                 resetTimer();
                                 return;
                             }
                         }
                         isWorkPhase = true;
                         timeRemaining = workDuration;
-                        alert('Work time!');
+                        playBeep(startBeep);
                     }
                 }
             }, 1000);
@@ -153,10 +169,11 @@
         function resetTimer() {
             clearInterval(timerInterval);
             isRunning = false;
-            timeRemaining = workDuration;
+            timeRemaining = warmUpDuration;
             currentRound = 0;
             currentCycle = 0;
-            isWorkPhase = true;
+            isWorkPhase = false;
+            isWarmUpPhase = true;
             updateTimerDisplay();
             startBtn.disabled = false;
             resetBtn.disabled = true;
@@ -169,3 +186,4 @@
     </script>
 </body>
 </html>
+
