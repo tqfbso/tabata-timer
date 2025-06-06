@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.timer {
+    font-size: 5rem;
+    margin: 50px 0;
+}
+
+button {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin: 10px;
+}
+
+button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+footer {
+    margin-top: 50px;
+    color: #777;
+}
+
+.cycle-selector {
+    margin: 20px 0;
+}
+
+.cycle-selector label {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.cycle-selector select {
+    font-size: 1.2rem;
+    padding: 5px;
+}
+.settings label {
+    margin: 0 10px;
+    font-size: 1rem;
+}
+.settings input {
+    width: 60px;
+    padding: 5px;
+    margin-left: 5px;
+}
+#progress {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+body.warm-up {
+    background-color: #ffeeba;
+}
+body.work {
+    background-color: #d4edda;
+}
+body.rest {
+    background-color: #d1ecf1;
+}
+body.warm-up #timer-display { color: #856404; }
+body.work #timer-display { color: #155724; }
+body.rest #timer-display { color: #0c5460; }
+@media (max-width: 600px) {
+    .timer { font-size: 3rem; margin: 20px 0; }
+    button { width: 80%; max-width: 300px; padding: 20px; font-size: 1.5rem; }
+    .settings label { display: block; margin: 10px auto; }
+}
