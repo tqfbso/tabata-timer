@@ -4,65 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabata Fitness App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px 0;
-        }
-
-        header h1 {
-            margin: 0;
-        }
-
-        .timer {
-            font-size: 5rem;
-            margin: 50px 0;
-        }
-
-        button {
-            background-color: #007BFF;
-            color: #fff;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin: 10px;
-        }
-
-        button:disabled {
-            background-color: #aaa;
-            cursor: not-allowed;
-        }
-
-        footer {
-            margin-top: 50px;
-            color: #777;
-        }
-
-        .cycle-selector {
-            margin: 20px 0;
-        }
-
-        .cycle-selector label {
-            font-size: 1.2rem;
-            margin-right: 10px;
-        }
-
-        .cycle-selector select {
-            font-size: 1.2rem;
-            padding: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
@@ -79,11 +21,18 @@
             <option value="5">5 Cycles</option>
         </select>
     </div>
+    <div class="settings">
+        <label for="warmup-input">Warm-up (sec): <input id="warmup-input" type="number" value="7" min="1"></label>
+        <label for="work-input">Work (sec): <input id="work-input" type="number" value="20" min="1"></label>
+        <label for="rest-input">Rest (sec): <input id="rest-input" type="number" value="10" min="1"></label>
+        <label for="rounds-input">Rounds: <input id="rounds-input" type="number" value="8" min="1"></label>
+    </div>
 
-    <div class="timer" id="timer-display">00:00</div>
+    <div class="timer" id="timer-display" role="timer" aria-live="assertive">00:00</div>
 
-    <button id="start-btn">Start</button>
-    <button id="reset-btn" disabled>Reset</button>
+    <div id="progress" aria-live="polite"></div>
+    <button id="start-btn" aria-label="Start timer">Start</button>
+    <button id="reset-btn" aria-label="Reset timer" disabled>Reset</button>
 
     <footer>
         <p>&copy; 2025 Tabata Fitness App</p>
@@ -93,10 +42,10 @@
         let timerInterval;
         let isRunning = false;
         const workDuration = 20; // seconds
-        const restDuration = 10; // seconds
-        const warmUpDuration = 7; // seconds
-        const totalRounds = 8;
-
+        let workDuration = 20; // seconds
+        let restDuration = 10; // seconds
+        let warmUpDuration = 7; // seconds
+        let totalRounds = 8;
         let currentRound = 0;
         let currentCycle = 0;
         let totalCycles = 1;
@@ -109,6 +58,11 @@
         const resetBtn = document.getElementById('reset-btn');
         const cycleCountSelect = document.getElementById('cycle-count');
 
+        const warmupInput = document.getElementById("warmup-input");
+        const workInput = document.getElementById("work-input");
+        const restInput = document.getElementById("rest-input");
+        const roundsInput = document.getElementById("rounds-input");
+        const progressDisplay = document.getElementById("progress");
         // Use locally hosted audio files
         const startBeep = new Audio('./start_beep.mp3');
         const stopBeep = new Audio('./stop_beep.mp3');
@@ -123,6 +77,21 @@
             const seconds = timeRemaining % 60;
             timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
+        function updateProgressDisplay() {
+            progressDisplay.textContent = `Cycle ${currentCycle + 1} of ${totalCycles} | Round ${isWarmUpPhase ? 0 : currentRound + 1} of ${totalRounds}`;
+        }
+
+        function updatePhaseClasses() {
+            document.body.classList.remove("warm-up", "work", "rest");
+            if (isWarmUpPhase) {
+                document.body.classList.add("warm-up");
+            } else if (isWorkPhase) {
+                document.body.classList.add("work");
+            } else {
+                document.body.classList.add("rest");
+            }
+        }
+
 
         function playBeep(beep, repeat = 1) {
             for (let i = 0; i < repeat; i++) {
@@ -134,6 +103,7 @@
             }
         }
 
+
         function startTimer() {
             if (isRunning) return;
 
@@ -141,9 +111,23 @@
             startBeep.play().catch(() => console.log('Audio unlocked for start beep.'));
             stopBeep.play().catch(() => console.log('Audio unlocked for stop beep.'));
 
-            preloadAudio(); // Preload to ensure smooth playback later.
+            preloadAudio();
 
+            warmUpDuration = parseInt(warmupInput.value, 10);
+            workDuration = parseInt(workInput.value, 10);
+            restDuration = parseInt(restInput.value, 10);
+            totalRounds = parseInt(roundsInput.value, 10);
             totalCycles = parseInt(cycleCountSelect.value, 10);
+
+            currentRound = 0;
+            currentCycle = 0;
+            timeRemaining = warmUpDuration;
+            isWarmUpPhase = true;
+            isWorkPhase = false;
+            updateTimerDisplay();
+            updateProgressDisplay();
+            updatePhaseClasses();
+
             isRunning = true;
             startBtn.disabled = true;
             resetBtn.disabled = false;
@@ -178,6 +162,8 @@
                         timeRemaining = workDuration;
                         playBeep(startBeep);
                     }
+                    updateProgressDisplay();
+                    updatePhaseClasses();
                 }
             }, 1000);
         }
@@ -185,20 +171,30 @@
         function resetTimer() {
             clearInterval(timerInterval);
             isRunning = false;
+
+            warmUpDuration = parseInt(warmupInput.value, 10);
+            workDuration = parseInt(workInput.value, 10);
+            restDuration = parseInt(restInput.value, 10);
+            totalRounds = parseInt(roundsInput.value, 10);
+            totalCycles = parseInt(cycleCountSelect.value, 10);
+
             timeRemaining = warmUpDuration;
             currentRound = 0;
             currentCycle = 0;
             isWorkPhase = false;
             isWarmUpPhase = true;
             updateTimerDisplay();
+            updateProgressDisplay();
+            updatePhaseClasses();
             startBtn.disabled = false;
             resetBtn.disabled = true;
         }
-
         startBtn.addEventListener('click', startTimer);
         resetBtn.addEventListener('click', resetTimer);
 
         updateTimerDisplay();
+        updateProgressDisplay();
+        updatePhaseClasses();
     </script>
 </body>
 </html>
